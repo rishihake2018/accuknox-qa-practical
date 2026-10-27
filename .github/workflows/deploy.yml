@@ -1,0 +1,57 @@
+name: Deploy Wisecow to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish Wisecow"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event != 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main' &&
+      vars.ENABLE_K8S_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the published revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Configure cluster access
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          set -eu
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "KUBE_CONFIG secret is required for remote deployment." >&2
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$KUBE_CONFIG" > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+      - name: Apply Kubernetes resources
+        env:
+          IMAGE_TAG: sha-${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -eu
+          kubectl apply -f k8s/namespace.yaml
+          kubectl wait --for=jsonpath='{.status.phase}'=Active namespace/wisecow --timeout=60s
+          kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml -f k8s/ingress.yaml
+          kubectl set image deployment/wisecow \
+            wisecow="ghcr.io/nyrahul/wisecow:$IMAGE_TAG" \
+            --namespace wisecow
+          kubectl rollout status deployment/wisecow --namespace wisecow --timeout=180s
+      - name: Remove temporary kubeconfig
+        if: always()
+        run: rm -f "$RUNNER_TEMP/kubeconfig"

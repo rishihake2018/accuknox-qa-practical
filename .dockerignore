@@ -1,0 +1,14 @@
+.git
+.github
+.gitignore
+.dockerignore
+tests
+docs
+k8s
+scripts
+*.pem
+*.key
+*.crt
+*.kubeconfig
+kubeconfig*
+.env*
