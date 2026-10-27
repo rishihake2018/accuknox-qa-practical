@@ -1,4 +1,4 @@
-# Wisecow
+ # Wisecow
 
 Wisecow is a small Bash HTTP service that responds on port 4499 with a fortune displayed by `cowsay`. This repository also contains a non-root container image, Kubernetes manifests, GitHub Actions workflows, and independent application/system health-check tools.
 
