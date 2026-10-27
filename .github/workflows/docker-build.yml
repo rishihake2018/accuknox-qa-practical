@@ -23,7 +23,7 @@ jobs:
       - name: Check Bash syntax
         run: bash -n wisecow.sh scripts/system_health_monitor.sh
       - name: Build local image for integration tests
-        run: docker build -t ghcr.io/nyrahul/wisecow:latest .
+        run: docker build -t ghcr.io/rishihake2018/accuknox-qa-practical:latest .
       - name: Test repeated HTTP requests and container health
         run: python -m unittest tests.test_wisecow_http -v
       - name: Set up Docker Buildx
@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/nyrahul/wisecow
+          images: ghcr.io/rishihake2018/accuknox-qa-practical
           tags: |
             type=sha,prefix=sha-,format=long
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
