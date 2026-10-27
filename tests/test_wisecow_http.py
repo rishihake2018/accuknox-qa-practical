@@ -1,7 +1,7 @@
 """Docker-backed integration tests for the Wisecow HTTP server.
 
 Build the image first with:
-    docker build -t ghcr.io/nyrahul/wisecow:latest .
+    docker build -t ghcr.io/rishihake2018/accuknox-qa-practical:latest .
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import urllib.request
 import uuid
 
 
-IMAGE = os.environ.get("WISECOW_IMAGE", "ghcr.io/nyrahul/wisecow:latest")
+IMAGE = os.environ.get("WISECOW_IMAGE", "ghcr.io/rishihake2018/accuknox-qa-practical:latest")
 
 
 class WisecowHttpIntegrationTests(unittest.TestCase):
